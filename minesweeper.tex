@@ -1,0 +1,153 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8x]{inputenc}
+\usepackage{ucs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\begin{document}
+\pagestyle{myheadings} \thispagestyle{empty}
+
+\begin{center}
+\baselineskip=24pt {\Large \bf  {
+Project Report on implementation of semi-automated Minesweeper
+}}
+
+                      \vspace*{1cm}
+
+
+
+                      \vspace{5mm}
+                   {\em  by} \\
+                  
+             {
+              Arpit Toshniwal(J08026) 
+                     and       
+              Abhash Kumar Singh (J08001)
+              }
+              {\em\linebreak under the guidance of}
+              {\linebreak Dr. Gaurav Harit}
+              {\em\linebreak in the course}
+               {\linebreak\large Artifical Intelligence}
+
+
+                   \vspace{1cm}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[scale=0.3]{iitrlogo.eps} 
+%%\epsfig{file=iitrlogo.eps, width=3cm,height=3cm,angle=0}
+                   \vspace*{1cm}
+\baselineskip=24pt
+\end{center}
+\end{figure}
+
+
+
+
+{\Large      INDIAN INSTITUTE OF TECHNOLOGY  RAJASTHAN}\\
+{\large      JODHPUR-342005, INDIA}\\
+
+{\large                           April 17, 2011}
+\end{center}
+\clearpage
+\subsection*{Introduction}
+Minesweeper is a single-player video game. The object of the game is to clear an abstract minefield without detonating a mine.Contrary to the beliefs of some, Minesweeper cannot always be solved with 100$\%$ certainty, and may require the occasional use of probability to flag the square most likely to have a mine. In other words, one must sometimes guess to solve a minesweeper puzzle.
+\subsection*{Project Proposal}
+\paragraph*{}
+Minesweeper is essentially the knowledge base entailment with the exception at first step.In this program we have implemented a \textbf{semi-automated \textit{Minesweeper}}.
+\paragraph*{}
+It is semi-automated in the sense that, it accepts input from user whether to automate the game or to play it manually.User can also switch to \textit{heuristic mode} where automation is not available but it can be used effectively when a chance game is there.This game is being played on konsole.
+\paragraph*{}
+Another important aspect of this game is that it is fully customized as it asks user for the height and width of the board as well as number of mines.
+\clearpage
+\subsection*{Implementation Details}
+\subsubsection*{Some Important Definitions}
+ We are begining with the \textbf{\textit{status types}} of cells.
+\begin{itemize}
+\item[]\textit{closed} : Initial state, the contents of this cell are unknown.
+\item[]\textit{opened} : User has opened this cell
+\item[]\textit{marked} : User has marked this cell as containing a mine. The analyzer only uses this state when looking for mines.
+\item[]\textit{invalid} : Cell is invalid and not part of the playfield. We place a 1 cell border of invalid cells around the playfield to safe on a number of array bound checks.
+\end{itemize}
+There are \textbf{\textit{set types}} regarding it in being a \textit{superset} or \textit{subset} of a neighbouring open cell.
+\begin{itemize}
+\item[]\textit{super} : If it is in super set of some neighbouring open cell.
+\item[]\textit{sub} : If it is in sub set of some neighbouring open cell.
+\item[]\textit{both} : If it is in super and sub set of some neighbouring open cell.
+\item[]\textit{undetermined} : This is the initial state at the begining of game.It leads to the updatation into other states.
+\end{itemize}
+Now there are two modes opening and marking whose uses can be understood from their name.We will discuss the rules later in the document.
+
+\subsubsection*{Common Varialbles}
+\begin{itemize}
+\item[]\textit{gcells} : It contains the number of valid cells left to open in the playboard. 
+\item[]\textit{gmines} : It contains the number of mines present in the playboard.
+\item[]\textit{Class play$\_$cell} : This class contains all the information regarding a single cell including both game information and analysis data.Game information is not visible to the user but user can get all the analysis data if he is carefull enough.The contents of this class are:
+\item[]\textit{mine} : If it is true, the cell contains mine.
+\item[]\textit{neighbour$\_$mine} : Number of mines in the direct neighbour cells applicable only when the cell doesnot contain mine.
+\item[]\textit{neighbour$\_$mine$\_$found} : The number of mine found in the neighbourhood of the cell and visible to user.
+\item[]\textit{unc} : It is the set of closed neighbours of this open cell a subset,superset,or both of that of other open cells.
+\item[]\textit{super$\_$set} : The sets which are a superset of the UNC of this open cell. These are 8 in number.
+\item[]\textit{sub$\_$set} : The sets which are a subset of the UNC of this open cell. These are 21 in number.
+\item[]\textit{sub$\_$set$\_$cntr} : It counts subsets.
+\item[]\textit{heur$\_$numerator} : numerators of all chances a mine is not in this closed cell. 
+\item[]\textit{heur$\_$denominator} : denominator of all chances a mine is not in this closed cell.
+\item[]\textit{rating} : Rating of this cell by the heuristic function.
+\item[]\textit{constructor} : It puts mines as false, neighbour mines as 0, rating as 9, neighbour$\_$closed as 8, all the membership counters as 0 and set type as undetermined.
+ \end{itemize}
+\subsubsection*{Important Functions} 
+\begin{itemize}
+\item[]\textit{Neighbour} : Helper function to walk through every neighbour of a given cell
+\end{itemize}
+      1 0 7\\
+      2 * 6\\
+      3 4 5\\
+\begin{itemize}
+\item[]\textit{AddSetType} : Small helper function to add a set type to a playcell.
+\item[]\textit{AddSet} : Small helper function to add sets of a specific kind to a cell of the opposite kind .i.e, when a subset set is found, it will mark the corresponding cell 'super' and add itself to that super's sub$\_$set array provided it doesn't already exist.
+\item[]\textit{info} : This function prints the details of the program.
+\item[]\textit{help} : This function prints help required by user to run this program.
+\item[]\textit{rules} : This functon prints hints required by user to play the game.
+\item[]\textit{Clearscreen} : This function clears the screen by inserting 40 new lines.
+\item[]\textit{CreateBoard} : This function creates the playboard as per user input and updates the cells information to the correct value.
+\item[]\textit{PlaceMines} : This function places mines randomly over the playboard.
+\item[]\textit{PrintBoards} : This prints the play board and the analysis board next to eachother on the Konsole. 
+\item[]\textit{PrintBoardsShowAll} : This prints the play board showing the positions of all mines and neighbours.Used for testing the program.
+\item[]\textit{UpdateNeighboursMarked} : This function updates all neighbours for a given cell in the situation that this cell becomes 'marked'. Each Neighbour has one less closed neighbour now, and one extra mine has been found.
+\item[]\textit{UpdateNeighboursClosed} : This function updates all neighbours for a given cell in the situation that this cell becomes closed. This happens when a previous mine marking is removed. Each Neighbour has on more closed neighbour now, and one mine less has been found.
+\item[]\textit{UpdateNeighboursOpened} : This function updates all neighbours for a given cell in the situation that this cell is opened. 
+\item[]\textit{CheckSet} : Checks the area around the current cell to see whether new sub- or super sets have been created.
+\item[]\textit{CheckCell} : This function checks if a rule applies to the given cell.It's only called to check opened cells, either when just opened or when something in their environment changes. It also takes care of mechanism when rules apply.
+\item[]\textit{CheckNeighbours} : This function is called after a cell has been changed in some way.We now check if the change has affected the environment such that a rule can be applied to the new situation.
+\item[]\textit{OpenCell} : Updates all effected cells and checks if rules apply whenever a cell is opened.
+\item[]\textit{MakeCell} : Updates all effected cells and checks if rules apply whenever a cell is marked.
+\item[]\textit{CloseCell} : Updates all effected cells and checks if rules apply whenever a cell is closed.
+\end{itemize}      
+\subsubsection*{Rules} 
+\paragraph*{}
+Following are the rules used for hint or automation.
+\begin{itemize}
+\item[]\textit{ruleA} :X neighbour mines, X found, so rest is safe.It has two conditions:
+\begin{itemize}
+\item[•] all mines found,so all the closed neighbours are safe.
+\item[•]if no. of mines is 0 then automatically open all the neighbouring cells.
+\paragraph*{}
+The second point is always run while the first is run when autoA is true.
+\end{itemize}
+\item[]\textit{ruleB} : Mines left equals unknown cells.So,all closed neighbours are mines.Based on this rule they are marked if autoB is true.
+\item[]\textit{ruleC} :All unknown neighbours of cell A are a subset of the unknown neighbours of cell B,outside subset is safe.Based on this rule the mines are opened if autoC is true.
+\end{itemize}
+\subsubsection{Heuristics}
+\paragraph*{}
+In this mode we calculate rating of each cell.Higher the ratings higher is the proability of the cell to contain mine.Initailly all the cells have rating 9(the highest one) but it is updated everytime a cell is opened or marked in the CheckCell function.
+\paragraph*{}
+Rating is calculate in following manner:
+\begin{itemize}
+\item[•]for each closed cell in the neighbour-hood of an open cell calculate proability of having a mine as($ \dfrac{um-mm}{mm} $) where um is number of unknown mines left and mm is number of mines marked.
+\item[•]multiply these values obtained from every neighbourhood.
+\item[•]multiply it with 9 to get the rating and cast it to nearest integer.
+\end{itemize}
+
+\end{document}
